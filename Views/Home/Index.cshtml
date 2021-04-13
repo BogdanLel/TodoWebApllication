@@ -1,0 +1,301 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<div id="app">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-5">
+                @*<h5 class="element-style mb-3" style="border-left-color: rgb(191, 12, 12);">To do</h5>*@
+                <div class="row pt-4 pb-4">
+                    <div class="col-9">
+                        <div class="form-group shadow-card">
+                            <div class="input-group mb-3 caption">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text btn-style cursor-pointer" v-on:click="GetTodos(filter.CurrentPage, filter.OrderBy)" title="search for todos">
+                                        <i class="fal fa-search"></i>
+                                    </span>
+                                </div>
+                                <input class="form-control" type="search" placeholder="Search" v-model="searchText">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <button class="btn btn-style shadow-card w-100" data-toggle="modal" data-target="#addTaskModal" type="button">
+                            <i class="fal fa-plus-circle"></i>
+                            Add new task
+                        </button>
+                    </div>
+                    <div class="modal fade" id="addTaskModal" tabindex="-1" role="dialog" aria-labelledby="addTaskModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="addTaskModalLabel">Add todo</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <form class="col-6" data-vv-scope="form-add-todo">
+                                            <div>
+                                                <div class="input-group">
+                                                    <input class="form-control" placeholder="New task" v-validate="'required'" v-model="newTodo.Name" type="text" name="name">
+                                                    <span class="invalid-feedback">{{ errors.first('form-add-todo.name') }}</span>
+                                                </div>
+                                            </div>
+                                        </form>
+                                        <div class="col-1">
+                                            <input type="checkbox" name="status" v-on:click="itemS.Status = !itemS.Status" />
+                                        </div>
+                                        <div class="dropdown col-2">
+                                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <span v-if="!selectedPriority.Name">Priority Level</span>
+                                                <span v-else>{{ selectedPriority.Name }}</span>
+                                            </button>
+                                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                <div v-for="priority in priorities">
+                                                    <a class="dropdown-item" href="#" v-on:click="SelectPriority(priority)">{{ priority.Name }}</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="dropdown col-3">
+                                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <span v-if="!selectedUser.UserName">Select User</span>
+                                                <span v-else>{{ selectedUser.UserName }}</span>
+                                            </button>
+                                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                <div v-for="user in users">
+                                                    <a class="dropdown-item" href="#" v-on:click="SelectUser(user)">{{ user.UserName }}</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal" v-on:click="CheckStatus(itemS); AddTodo()">ADD</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="box-top shadow-card row">
+                    <div class="col-3">
+                        <div class="box-task">
+                            <span class="cursor-pointer">
+                                Task
+                                <i v-if="filter.OrderBy != 'sortDescendingByName'" class="far fa-sort-amount-down-alt" v-on:click="GetTodos(filter.CurrentPage, 'sortDescendingByName')"></i>
+                                <i v-else-if="filter.OrderBy != 'sortAscendingByName'" class="far fa-sort-amount-up-alt" v-on:click="GetTodos(filter.CurrentPage, 'sortAscendingByName')"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="box-priority">
+                            <span class="cursor-pointer">
+                                Priority
+                                <i v-if="filter.OrderBy != 'sortByHighestPriority'" class="far fa-sort-amount-down-alt" v-on:click="GetTodos(filter.CurrentPage, 'sortByHighestPriority')"></i>
+                                <i v-else-if="filter.OrderBy != 'sortByLowestPriority'" class="far fa-sort-amount-up-alt" v-on:click="GetTodos(filter.CurrentPage, 'sortByLowestPriority')"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="box-status">
+                            <span>Status</span>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="box-action">
+                            <span>
+                                Action
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card shadow-card card">
+                    <ul class="list-group">
+                        <li class="list-group-item shadow-sm bg-white rounded mb-3" v-for="todo in todos" v-on:click="selectedItem = todo">
+                            <div class="row">
+                                <div class="col-3">
+                                    <div class="todo-task">
+                                        <span>{{ todo.Name }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="todo-priority">
+                                        <span class="badge badge-card" v-bind:class="{ 'badge-high' : todo.PriorityId == 1, 'badge-medium' : todo.PriorityId == 2, 'badge-low' : todo.PriorityId == 3 }">
+                                            {{ todo.PriorityName }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="todo-status">
+                                        <span v-if="todo.Status == true" class="status-done">
+                                            <i class="fas fa-check-circle" v-on:click="ChangeStatus(todo)"></i>
+                                            Done
+                                        </span>
+                                        <span v-if="todo.Status == false || todo.Status == null">
+                                            <i class="far fa-check-circle" v-on:click="ChangeStatus(todo)"></i>
+                                            To be done
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="todo-action">
+                                        <i class="fal fa-edit cursor-pointer" v-on:click="todoCopy = todo; GetItemDetails(todo)" data-toggle="modal" data-target="#editModal"></i>
+                                        <i class="fal fa-trash-alt cursor-pointer" v-on:click="DeleteItem(todo)"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="editModalLabel">Edit todo</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form data-vv-scope="form-change-todo">
+                                        <div class="input-group">
+                                            <input class="form-control" v-validate="'required'" v-model="todoCopy.Name" type="text" name="name">
+                                            <span class="invalid-feedback">{{ errors.first('form-change-todo.name') }}</span>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal" v-on:click="Rewrite(todoCopy)">Save changes</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div v-for="page in nrOfPages" class="d-inline">
+                        <div v-on:click="GetTodos(page, filter.OrderBy)" v-bind:class="{ 'badge-medium' : filter.CurrentPage == page, 'badge-low' : filter.CurrentPage != page }" class="badge mr-2 form-group">{{ page }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                @*<h5 class="element-style mb-3" style="border-left-color: rgb(52, 83, 185);">Done</h5>*@
+                <div class="box-top box-top-right shadow-card row">
+                    <div class="col-4">
+                        <div class="box-task">
+                            <span class="cursor-pointer">
+                                Task
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="box-priority">
+                            <span class="cursor-pointer">
+                                Priority
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="box-status-right">
+                            <span>Status</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card shadow-card card">
+                    <ul class="list-group">
+                        <li class="list-group-item shadow-sm bg-white rounded mb-3" v-for="doneTodo in doneTodos">
+                            <div class="row">
+                                <div class="col-5">
+                                    <div class="todo-task">
+                                        <span>{{ doneTodo.Name }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="todo-priority">
+                                        <span v-if="doneTodo.PriorityId == 1" class="badge badge-high badge-card">High</span>
+                                        <span v-if="doneTodo.PriorityId == 2" class="badge badge-medium">Medium</span>
+                                        <span v-if="doneTodo.PriorityId == 3" class="badge badge-low badge-card">Low</span>
+                                    </div>
+                                </div>
+                                <div class="col-5">
+                                    <div class="todo-status">
+                                        <span>
+                                            <i class="fas fa-check-circle"></i>
+                                            Done
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div v-for="pageDone in nrOfPagesDone" class="d-inline">
+                    <div v-on:click="GetDoneTodos(pageDone)" v-bind:class="{ 'badge-high' : filterDone.Currentpage == pageDone , 'badge-medium' : filterDone.Currentpage != pageDone }" class="badge mr-2 form-group">{{ pageDone }}</div>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                @*<h5 class="element-style mb-3" style="border-left-color: rgb(107, 213, 156);">To be done</h5>*@
+                <div class="box-top box-top-right shadow-card row">
+                    <div class="col-4">
+                        <div class="box-task">
+                            <span class="cursor-pointer">
+                                Task
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="box-priority">
+                            <span class="cursor-pointer">
+                                Priority
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="box-status">
+                            <span>Status</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card shadow-card card">
+                    <ul class="list-group">
+                        <li class="list-group-item shadow-sm bg-white rounded mb-3" v-for="toBeDoneTodo in toBeDoneTodos">
+                            <div class="row">
+                                <div class="col-5">
+                                    <div class="todo-task">
+                                        <span>{{ toBeDoneTodo.Name }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="todo-priority">
+                                        <span v-if="toBeDoneTodo.PriorityId == 1" class="badge badge-high badge-card">High</span>
+                                        <span v-if="toBeDoneTodo.PriorityId == 2" class="badge badge-medium">Medium</span>
+                                        <span v-if="toBeDoneTodo.PriorityId == 3" class="badge badge-low badge-card">Low</span>
+                                    </div>
+                                </div>
+                                <div class="col-5">
+                                    <div class="todo-status">
+                                        <span>
+                                            <i class="far fa-check-circle"></i>
+                                            To be done
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div v-for="page in nrOfPagesToBeDone" class="d-inline">
+                    <div v-on:click="GetToBeDoneTodos(page)" v-bind:class="{ 'badge-high' : filterToBeDone.Currentpage == page, 'badge-medium' : filterToBeDone.Currentpage != page }" class="badge mr-2 form-group">{{ page }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/Assets/js/VeeValidate.js"></script>
+    <script src="~/Assets/js/pages/home.js"></script>
+}

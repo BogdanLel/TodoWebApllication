@@ -1,0 +1,115 @@
+﻿@{
+    ViewBag.Title = "Users Page";
+}
+
+<div id="app">
+    <div class="container">
+        <div class="box-top shadow-card row">
+            <div class="col-4">
+                <div class="box-task">
+                    <span class="cursor-pointer">
+                        User
+                    </span>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="box-email">
+                    <span class="cursor-pointer">
+                        Email
+                    </span>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="box-status-right">
+                    <span>Count Task</span>
+                </div>
+            </div>
+        </div>
+        <div>
+            <ul class="list-group">
+                <li class="list-group-item shadow-sm bg-white rounded mb-3 cursor-pointer" v-for="(user,index) in users" data-toggle="collapse" :data-target="'#collapseTodos'+index">
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="user-name">
+                                <span>{{ user.UserName }}</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="user-email">
+                                <span>
+                                    {{ user.Email }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="box-status-right">
+                                <span>
+                                    {{ user.CountTask }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="collapse" :id="'collapseTodos'+index">
+                        <div>
+                            <div class="list-group">
+                                <div class="list-group-item mb-2" v-if="user.CountTask != 0">
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <div class="user-task">
+                                                <span>Task</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="user-priority">
+                                                <span>Priority</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="user-status">
+                                                <span>Status</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="list-group" v-for="todo in user.Todos">
+                            <div class="list-group-item mb-2">
+                                <div class="row">
+                                    <div class="col-4">
+                                        <div class="user-task">
+                                            <span>{{ todo.TaskName }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="user-priority">
+                                            <span class="badge badge-card" v-bind:class="{ 'badge-high' : todo.PriorityLevel == 1, 'badge-medium' : todo.PriorityLevel == 2, 'badge-low' : todo.PriorityLevel == 3 }">
+                                                {{ todo.Priority }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="user-status">
+                                            <span v-if="todo.Status == true" class="user-status-done">
+                                                <i class="fas fa-check-circle"></i>
+                                                Done
+                                            </span>
+                                            <span v-if="todo.Status == false">
+                                                <i class="far fa-check-circle"></i>
+                                                To be done
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/Assets/js/pages/User.js"></script>
+}
