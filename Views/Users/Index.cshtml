@@ -5,47 +5,90 @@
 <div id="app">
     <div class="container">
         <div class="box-top shadow-card row">
-            <div class="col-4">
-                <div class="box-task">
-                    <span class="cursor-pointer">
+            <div class="col-1">
+                <div class="task">
+                    <span>
+                        Tasks
+                    </span>
+                </div>
+            </div>
+            <div class="col-2">
+                <div class="user">
+                    <span>
                         User
                     </span>
                 </div>
             </div>
-            <div class="col-4">
+            <div class="col-2">
                 <div class="box-email">
-                    <span class="cursor-pointer">
+                    <span>
                         Email
                     </span>
                 </div>
             </div>
-            <div class="col-4">
-                <div class="box-status-right">
+            <div class="col-3">
+                <div class="box-email">
+                    <span>
+                        Role
+                    </span>
+                </div>
+            </div>
+            <div class="col-2">
+                <div class="box-status">
                     <span>Count Task</span>
+                </div>
+            </div>
+            <div class="col-2">
+                <div class="box-status-right">
+                    <span>Action</span>
                 </div>
             </div>
         </div>
         <div>
             <ul class="list-group">
-                <li class="list-group-item shadow-sm bg-white rounded mb-3 cursor-pointer" v-for="(user,index) in users" data-toggle="collapse" :data-target="'#collapseTodos'+index">
+                <li class="list-group-item shadow-sm bg-white rounded mb-3" v-for="(user,index) in users">
                     <div class="row">
-                        <div class="col-4">
-                            <div class="user-name">
+                        <div class="col-1" data-toggle="collapse" :data-target="'#collapseTodos'+index">
+                            <div v-if="user.Plus == true">
+                                <i class="far fa-plus-circle circle" v-on:click="user.Plus = false,$forceUpdate()"></i>
+                            </div>
+                            <div v-else-if="user.Plus == false">
+                                <i class="far fa-minus-circle circle" v-on:click="user.Plus = true,$forceUpdate()"></i>
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <div class="user-name-admin">
                                 <span>{{ user.UserName }}</span>
                             </div>
                         </div>
-                        <div class="col-4">
+                        <div class="col-2">
                             <div class="user-email">
                                 <span>
                                     {{ user.Email }}
                                 </span>
                             </div>
                         </div>
-                        <div class="col-4">
-                            <div class="box-status-right">
+                        <div class="dropdown col-3">
+                            <button class="btn btn-secondary dropdown-toggle user-role user-selection" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span v-if="!user.UserRole && !selectedRole.Name">User Role</span>
+                                <span v-else>{{ user.UserRole }}</span>
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <div v-for="role in roles">
+                                    <a class="dropdown-item" href="#" v-on:click="SelectRole(role), AssignRole(user.Id, role.Name)">{{ role.Name }}</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <div class="user-tasks">
                                 <span>
                                     {{ user.CountTask }}
                                 </span>
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <div class="trash">
+                                <i class="fal fa-trash-alt cursor-pointer" v-on:click="DeleteUser(user)"></i>
                             </div>
                         </div>
                     </div>

@@ -1,5 +1,4 @@
 ﻿body {
-    padding-top: 2em;
     padding-bottom: 2em;
     background-color: rgb(250 255 253);
 }
@@ -19,6 +18,17 @@
 .fa-edit {
     font-size: 15px;
     color: rgb(60 145 230);
+}
+
+.fa-file {
+    font-size: 15px;
+    color: rgb(60 145 230);
+}
+
+.fa-upload {
+    font-size: 15px;
+    color: rgb(60 145 230);
+    margin-left: 8px;
 }
 
 .crossText {
@@ -106,9 +116,16 @@
 .user-name {
     margin: 15px 15px 15px 30px;
 }
+.user-name-admin {
+    margin-top: 15px;
+    text-align: left;
+}
 .user-email {
     margin: 15px;
     text-align: center;
+}
+.user-role {
+    margin: 15px 15px 15px 150px;
 }
 
 .btn-style {
@@ -165,4 +182,45 @@
 }
 .user-status-done {
     margin: 5px 25px 5px 5px;
+}
+.user-tasks {
+    margin: 15px 15px 15px 150px;
+}
+
+.nav-bar {
+    vertical-align: top;
+}
+
+.menu {
+    margin: 0px 0px -53px;
+    position: sticky;
+    top: 0px;
+    z-index: 1001;
+}
+.navbar-items {
+    align-items: center;
+}
+
+.circle {
+    font-size: 30px;
+    color: rgb(60 145 230);
+    padding-top: 5px;
+    padding-right: 10px;
+}
+
+.task {
+    margin-top:10px;
+}
+.user {
+    margin-top: 10px;
+    text-align: left;
+}
+.trash {
+    margin-top: 15px;
+    margin-right: 40px;
+    float: right;
+}
+.user-selection {
+    background-color: rgb(60, 145, 230);
+    color: rgb(250 255 253);
 }

@@ -1,4 +1,6 @@
 ﻿<!DOCTYPE html>
+@using Microsoft.AspNet.Identity;
+
 <html>
 <head>
     <meta charset="utf-8" />
@@ -14,9 +16,52 @@
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-toasted/1.1.28/vue-toasted.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.js"></script>
 
 </head>
 <body>
+    <div>
+        <nav class="bg-white navbar navbar-expand-md shadow-sm nav-1 justify-content-between p-3 menu mb-5">
+            <a class="navbar-brand mb-0 h1" href="#">Todo App</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse navbar-items" id="navbarNav">
+                <ul class="navbar-nav ml-5 mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="/Home/MyTodos">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="/Account/Login">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="/Account/Register">Register</a>
+                    </li>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="/Users/Index">Users</a>
+                        </li>
+                    }
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="/">All Todos</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+            <div>
+                @if (System.Web.HttpContext.Current.User != null && System.Web.HttpContext.Current.User.Identity.IsAuthenticated)
+                {
+                    <span>Hi, 
+                        @System.Web.HttpContext.Current.User.Identity.Name
+                    </span>
+                }
+            </div>
+        </nav>
+    </div>
     <div class="container body-content">
         @RenderBody()
         <hr />

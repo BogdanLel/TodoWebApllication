@@ -31,6 +31,7 @@ namespace TodoWebAplication.BussinesLogic
             {
                 todos = todos.Where(x => x.Name.Contains(filter.FilterText));
             }
+            todos = todos.Where(x => x.AspNetUser.IsDeleted != true);
 
             switch (filter.OrderBy)
             {
@@ -85,6 +86,79 @@ namespace TodoWebAplication.BussinesLogic
             return pagingTodos;
         }
 
+
+
+        public PagingListViewModel<TodoViewModel> GetTodos(Filter filter, string userId)
+        {
+            PagingListViewModel<TodoViewModel> pagingTodos = new PagingListViewModel<TodoViewModel>();
+
+            var todos = _todoService.GetAllQuerable();
+
+            if (!String.IsNullOrEmpty(filter.FilterText))
+            {
+                todos = todos.Where(x => x.Name.Contains(filter.FilterText));
+            }
+            todos = todos.Where(x => x.AspNetUser.IsDeleted != true);
+            todos = todos.Where(x => x.UserId == userId);
+
+            switch (filter.OrderBy)
+            {
+                case "sortAscendingByName":
+                    todos = todos.OrderBy(x => x.Name);
+                    break;
+                case "sortDescendingByName":
+                    todos = todos.OrderByDescending(x => x.Name);
+                    break;
+                case "sortAscendingByDate":
+                    todos = todos.OrderBy(x => x.CreatedDateTime);
+                    break;
+                case "sortDescendingByDate":
+                    todos = todos.OrderByDescending(x => x.CreatedDateTime);
+                    break;
+                case "sortByHighestPriority":
+                    todos = todos.OrderBy(x => x.PriorityId);
+                    break;
+                case "sortByLowestPriority":
+                    todos = todos.OrderByDescending(x => x.PriorityId);
+                    break;
+                default:
+                    todos = todos.OrderBy(x => x.Name);
+                    break;
+            }
+
+            pagingTodos.Count = todos.Count();
+            int skipPages = filter.PageSize * (filter.CurrentPage - 1);
+            pagingTodos.Items = todos.Skip(skipPages).Take(filter.PageSize).Select(x => new TodoViewModel()
+            {
+                Id = x.Id,
+                Name = x.Name,
+                PriorityId = x.PriorityId,
+                Status = x.Status,
+                CreatedDateTime = x.CreatedDateTime,
+                PriorityName = x.Priority.Name,
+                PriorityLevel = x.Priority.PriorityLevel,
+                UserId = x.UserId,
+                UserName = x.AspNetUser.UserName,
+                Files = x.FilesTables.Select(y => new FilesViewModel()
+                {
+                    FileId = y.Id,
+                    FileName = y.Name
+                }).ToList(),
+            }).ToList();
+
+            // verificare
+            // through new exeption
+
+            pagingTodos.NumberOfPages = pagingTodos.Count / filter.PageSize;
+
+            if (pagingTodos.Count % filter.PageSize > 0)
+            {
+                pagingTodos.NumberOfPages += 1;
+            }
+
+            return pagingTodos;
+        }
+
         public TodoViewModel GetTodoById(int Id)
         {
             var currentTodo = _todoService.Get(Id);
@@ -112,6 +186,19 @@ namespace TodoWebAplication.BussinesLogic
             _todoService.Add(todoTable);
         }
 
+        public void AddTodo(CreateTodoViewModel todo, string userId)
+        {
+            var todoTable = new Todo()
+            {
+                Name = todo.Name,
+                Status = todo.Status,
+                CreatedDateTime = todo.CreatedDateTime,
+                PriorityId = todo.PriorityId,
+                UserId = userId
+            };
+            _todoService.Add(todoTable);
+        }
+
         public void UpdateTodo(TodoViewModel todo)
         {
             var oldTodo = _todoService.Get(todo.Id);
@@ -121,7 +208,7 @@ namespace TodoWebAplication.BussinesLogic
                 Name = todo.Name,
                 Status = todo.Status,
                 PriorityId = todo.PriorityId,
-                UserId = todo.UserId
+                UserId = oldTodo.UserId
             };
             _todoService.Update(todoTable, todoTable.Id);
         }
@@ -137,6 +224,38 @@ namespace TodoWebAplication.BussinesLogic
             PagingListViewModel<TodoViewModel> pagingTodos = new PagingListViewModel<TodoViewModel>();
 
             var todos = _todoService.GetAllQuerable().Where(x => x.Status == true);
+            todos = todos.Where(x => x.AspNetUser.IsDeleted != true);
+            todos = todos.OrderBy(x => x.Name);
+            todos = todos.OrderBy(x => x.CreatedDateTime);
+            pagingTodos.Count = todos.Count();
+            int skipPages = PageSize * (CurrentPage - 1);
+            pagingTodos.Items = todos.Skip(skipPages).Take(PageSize).Select(x => new TodoViewModel()
+            {
+                Id = x.Id,
+                Name = x.Name,
+                PriorityId = x.PriorityId,
+                Status = x.Status,
+                CreatedDateTime = x.CreatedDateTime,
+                UserId = x.UserId
+            }).ToList();
+
+            pagingTodos.NumberOfPages = pagingTodos.Count / PageSize;
+
+            if (pagingTodos.Count % PageSize > 0)
+            {
+                pagingTodos.NumberOfPages += 1;
+            }
+
+            return pagingTodos;
+        }
+
+        public PagingListViewModel<TodoViewModel> GetDoneTodos(int CurrentPage, int PageSize, string userId)
+        {
+            PagingListViewModel<TodoViewModel> pagingTodos = new PagingListViewModel<TodoViewModel>();
+
+            var todos = _todoService.GetAllQuerable().Where(x => x.Status == true);
+            todos = todos.Where(x => x.AspNetUser.IsDeleted != true);
+            todos = todos.Where(x => x.UserId == userId);
 
             todos = todos.OrderBy(x => x.Name);
             todos = todos.OrderBy(x => x.CreatedDateTime);
@@ -165,8 +284,38 @@ namespace TodoWebAplication.BussinesLogic
         {
             PagingListViewModel<TodoViewModel> pagingTodos = new PagingListViewModel<TodoViewModel>();
 
-            var todos = _todoService.GetAllQuerable().Where(x => x.Status == false);
+            IQueryable<Todo> todos = _todoService.GetAllQuerable().Where(x => x.Status == false);
+            todos = todos.Where(x => x.AspNetUser.IsDeleted != true);
+            todos = todos.OrderBy(x => x.Name);
 
+            pagingTodos.Count = todos.Count();
+            int skipPages = PageSize * (CurrentPage - 1);
+            pagingTodos.Items = todos.Skip(skipPages).Take(PageSize).Select(x => new TodoViewModel()
+            {
+                Id = x.Id,
+                Name = x.Name,
+                PriorityId = x.PriorityId,
+                Status = x.Status,
+                UserId = x.UserId
+            }).ToList();
+
+            pagingTodos.NumberOfPages = pagingTodos.Count / PageSize;
+
+            if (pagingTodos.Count % PageSize > 0)
+            {
+                pagingTodos.NumberOfPages += 1;
+            }
+
+            return pagingTodos;
+        }
+
+        public PagingListViewModel<TodoViewModel> GetToBeDoneTodos(int CurrentPage, int PageSize, string userId)
+        {
+            PagingListViewModel<TodoViewModel> pagingTodos = new PagingListViewModel<TodoViewModel>();
+
+            var todos = _todoService.GetAllQuerable().Where(x => x.Status == false);
+            todos = todos.Where(x => x.UserId == userId);
+            todos = todos.Where(x => x.AspNetUser.IsDeleted != true);
             todos = todos.OrderBy(x => x.Name);
 
             pagingTodos.Count = todos.Count();

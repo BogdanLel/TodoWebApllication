@@ -182,14 +182,18 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="BussinesLogic\FileLogic.cs" />
     <Compile Include="BussinesLogic\PriorityLogic.cs" />
+    <Compile Include="BussinesLogic\RolesLogic.cs" />
     <Compile Include="BussinesLogic\TodoLogic.cs" />
     <Compile Include="BussinesLogic\UsersLogic.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\FileApiController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\PriorityApiController.cs" />
     <Compile Include="Controllers\PriorityController.cs" />
+    <Compile Include="Controllers\RoleApiController.cs" />
     <Compile Include="Controllers\TodoApiController.cs" />
     <Compile Include="Controllers\UsersApiController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
@@ -210,6 +214,9 @@
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\C__MigrationHistory.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FilesTable.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\IdentityModels.cs" />
@@ -233,19 +240,25 @@
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Services\BaseService.cs" />
+    <Compile Include="Models\Services\FileService.cs" />
     <Compile Include="Models\Services\PriorityService.cs" />
+    <Compile Include="Models\Services\RolesService.cs" />
     <Compile Include="Models\Services\TodoService.cs" />
     <Compile Include="Models\Services\UsersService.cs" />
     <Compile Include="Models\Todo.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\ViewModels\CreateTodoViewModel.cs" />
+    <Compile Include="Models\ViewModels\FileEntity.cs" />
+    <Compile Include="Models\ViewModels\FileWriteResponse.cs" />
     <Compile Include="Models\ViewModels\GenericViewModel.cs" />
     <Compile Include="Models\ViewModels\PriorityViewModel.cs" />
+    <Compile Include="Models\ViewModels\RolesViewModel.cs" />
     <Compile Include="Models\ViewModels\TodoViewModel.cs" />
     <Compile Include="Models\ViewModels\UsersViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
+    <Compile Include="Utils\GetAppSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\css\bootstrap.min.css" />
@@ -13038,7 +13051,7 @@
     <Content Include="Assets\js\demo.js" />
     <Content Include="Assets\js\light-bootstrap-dashboard.js" />
     <Content Include="Assets\js\pages\home.js" />
-    <Content Include="Assets\js\pages\LoggedInUser.js" />
+    <Content Include="Assets\js\pages\MyTodos.js" />
     <Content Include="Assets\js\pages\User.js" />
     <Content Include="Assets\js\plugins\bootstrap-datetimepicker.js" />
     <Content Include="Assets\js\plugins\bootstrap-notify.js" />
@@ -13241,8 +13254,6 @@
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
-    <Content Include="Views\Home\About.cshtml" />
-    <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Account\_ExternalLoginsListPartial.cshtml" />
     <Content Include="Views\Account\ConfirmEmail.cshtml" />
@@ -13265,10 +13276,11 @@
     <Content Include="Views\Shared\Lockout.cshtml" />
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
     <Content Include="Views\Users\Index.cshtml" />
-    <Content Include="Views\Users\LoggedInUser.cshtml" />
+    <Content Include="Views\Home\MyTodos.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="AttachmentDirectory\" />
     <Folder Include="Views\Priority\" />
   </ItemGroup>
   <ItemGroup>

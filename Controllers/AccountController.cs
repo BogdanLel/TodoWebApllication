@@ -1,14 +1,12 @@
-﻿using System;
-using System.Globalization;
+﻿using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.Owin;
+using Microsoft.Owin.Security;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.Owin;
-using Microsoft.Owin.Security;
 using TodoWebApllication.Models;
+using TodoWebApllication.Models.ViewModels;
 
 namespace TodoWebApllication.Controllers
 {
@@ -22,7 +20,7 @@ namespace TodoWebApllication.Controllers
         {
         }
 
-        public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager )
+        public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager)
         {
             UserManager = userManager;
             SignInManager = signInManager;
@@ -34,9 +32,9 @@ namespace TodoWebApllication.Controllers
             {
                 return _signInManager ?? HttpContext.GetOwinContext().Get<ApplicationSignInManager>();
             }
-            private set 
-            { 
-                _signInManager = value; 
+            private set
+            {
+                _signInManager = value;
             }
         }
 
@@ -51,6 +49,7 @@ namespace TodoWebApllication.Controllers
                 _userManager = value;
             }
         }
+
 
         //
         // GET: /Account/Login
@@ -120,7 +119,7 @@ namespace TodoWebApllication.Controllers
             // If a user enters incorrect codes for a specified amount of time then the user account 
             // will be locked out for a specified amount of time. 
             // You can configure the account lockout settings in IdentityConfig
-            var result = await SignInManager.TwoFactorSignInAsync(model.Provider, model.Code, isPersistent:  model.RememberMe, rememberBrowser: model.RememberBrowser);
+            var result = await SignInManager.TwoFactorSignInAsync(model.Provider, model.Code, isPersistent: model.RememberMe, rememberBrowser: model.RememberBrowser);
             switch (result)
             {
                 case SignInStatus.Success:
@@ -153,10 +152,11 @@ namespace TodoWebApllication.Controllers
             {
                 var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
                 var result = await UserManager.CreateAsync(user, model.Password);
+                // UserManager.AddToRoles
                 if (result.Succeeded)
                 {
-                    await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
-                    
+                    await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+
                     // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=320771
                     // Send an email with this link
                     // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
@@ -171,6 +171,27 @@ namespace TodoWebApllication.Controllers
             // If we got this far, something failed, redisplay form
             return View(model);
         }
+
+        [HttpPost]
+        public void AssignRole(AssignRoles assignRoles)
+        {
+            // var roles = UserManager.GetRoles(assignRoles.Id);
+            string[] roles = { "User", "Admin" };
+            if (ModelState.IsValid)
+            {
+                if (assignRoles.Name == "User")
+                {
+                    UserManager.RemoveFromRoles(assignRoles.Id, roles);
+                    UserManager.AddToRole(assignRoles.Id, assignRoles.Name);
+                }
+                else
+                {
+                    UserManager.AddToRole(assignRoles.Id, assignRoles.Name);
+                }
+            }
+        }
+
+        
 
         //
         // GET: /Account/ConfirmEmail

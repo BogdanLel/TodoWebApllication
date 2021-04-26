@@ -1,4 +1,4 @@
-Vue.use(VeeValidate, {
+﻿Vue.use(VeeValidate, {
     classes: true,
     events: 'change',
     classNames: {
@@ -22,7 +22,6 @@ const Toast = Swal.mixin({
 var app = new Vue({
     el: '#app',
     data: {
-        title: 'My first work app',
         newTodo: { Name: '', Status: false, Priority: 0, CurrentDateTime: '' },
         todos: [],
         priorities: [],
@@ -40,10 +39,13 @@ var app = new Vue({
         nrOfPagesToBeDone: 0,
         searchText: '',
         selectedPriority: {},
-        selectedUser: {},
         todoEdit: {},
+        file: '',
+        fileName: '',
+        fileEntity: {}
     },
     methods: {
+
         ChangeStatus: function (todo) {
             if (todo.Status == true) {
                 todo.Status = false;
@@ -59,7 +61,7 @@ var app = new Vue({
             }
         },
 
-        GetTodos: function (page, order) {
+        GetMyTodos: function (page, order) {
             if (!page) {
                 page = 1;
             }
@@ -72,7 +74,7 @@ var app = new Vue({
 
             this.filter.CurrentPage = page;
             this.filter.FilterText = this.searchText;
-            this.$http.post('/api/TodoApi/GetTodos', this.filter).then(response => {
+            this.$http.post('/api/TodoApi/GetMyTodos', this.filter).then(response => {
                 // get body data
                 this.todos = response.body.Items;
                 this.nrOfPages = response.body.NumberOfPages;
@@ -81,12 +83,12 @@ var app = new Vue({
             });
         },
 
-        AddTodo: function () {
+        AddMyTodo: function () {
             const today = new Date()
             this.newTodo.CurrentDateTime = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate() + ' ' + today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
             this.$validator.validateAll('form-add-todo').then(function (result) {
                 if (result) {
-                    app.$http.post('/api/TodoApi/AddTodo', app.newTodo).then(
+                    app.$http.post('/api/TodoApi/AddMyTodo', app.newTodo).then(
                         function success(response) {
                             Swal.fire({
                                 icon: 'success',
@@ -119,9 +121,10 @@ var app = new Vue({
                         function success(response) {
                             Toast.fire({
                                 title: 'Todo has been Updated!',
-                                icon: 'success'
+                                icon: 'success',
                             })
                             $('#createServices').modal('hide');
+                            app.GetDefaultCatalog();
                             app.loadingPage = false;
                         },
                         function error() {
@@ -151,7 +154,7 @@ var app = new Vue({
                             app.todos.splice(index, 1);
                             Swal.fire(
                                 'Deleted!',
-                                'Task has been deleted.',
+                                'Your user has been deleted.',
                                 'success'
                             )
                         },
@@ -162,12 +165,12 @@ var app = new Vue({
             })
         },
 
-        GetDoneTodos: function (pageDone) {
+        GetMyDoneTodos: function (pageDone) {
             if (!pageDone) {
                 pageDone = 1;
             }
             this.filterDone.CurrentPage = pageDone;
-            this.$http.get('/api/TodoApi/GetDoneTodos?CurrentPage=' + this.filterDone.CurrentPage + '&PageSize=' + this.filterDone.PageSize).then(response => {
+            this.$http.get('/api/TodoApi/GetMyDoneTodos?CurrentPage=' + this.filterDone.CurrentPage + '&PageSize=' + this.filterDone.PageSize).then(response => {
                 // get body data
                 this.doneTodos = response.body.Items;
                 this.nrOfPagesDone = response.body.NumberOfPages;
@@ -176,12 +179,12 @@ var app = new Vue({
             });
         },
 
-        GetToBeDoneTodos: function (page) {
+        GetMyToBeDoneTodos: function (page) {
             if (!page) {
                 page = 1;
             }
             this.filterToBeDone.CurrentPage = page;
-            this.$http.get('/api/TodoApi/GetToBeDoneTodos?CurrentPage=' + this.filterToBeDone.CurrentPage + '&PageSize=' + this.filterToBeDone.PageSize).then(response => {
+            this.$http.get('/api/TodoApi/GetMyToBeDoneTodos?CurrentPage=' + this.filterToBeDone.CurrentPage + '&PageSize=' + this.filterToBeDone.PageSize).then(response => {
                 // get body data
                 this.toBeDoneTodos = response.body.Items;
                 this.nrOfPagesToBeDone = response.body.NumberOfPages;
@@ -204,26 +207,93 @@ var app = new Vue({
             this.newTodo.PriorityId = priority.Id;
         },
 
-        GetUsers: function () {
-            this.$http.get('/api/UsersApi/GetUsers').then(response => {
-                // get body data
-                this.users = response.body;
+        OnFileChange: function () {
+            var input = event.target;
+            if (input.files && input.files[0]) {
+                var fileName = input.files[0].name
+                var reader = new FileReader();
+                if (input.files[0].size > 100000000) { //1 mb
+                    swal({
+                        position: 'top-end',
+                        type: 'error',
+                        title: '@Resources.Timesheet_UI.file_is_to_big',
+                        text: "@Resources.Timesheet_UI.maxim_size_mb",
+                        showConfirmButton: false,
+                        timer: 3000
+                    })
+                }
+                else {
+                    reader.onload = function (e) {
+                        app.file = e.target.result;
+                        app.FileExtValidate(fileName);
+                    }
+                    reader.readAsDataURL(input.files[0]);
+                }
+            }
+        },
+
+        FileExtValidate: function (fileName) {
+            var validExt = ".png .jpg .jpeg .jfif .docx .pdf";
+            var filePath = fileName;
+            var getFileExt = filePath.substring(filePath.lastIndexOf('.') + 1).toLowerCase();
+            var pos = validExt.indexOf(getFileExt);
+            if (pos > 0) {
+                this.fileName = fileName;
+                this.$forceUpdate();
+                return true;
+            }
+            else {
+                swal({
+                    position: 'top-end',
+                    type: 'error',
+                    title: '@Resources.Timesheet_UI.this_file_is_not_allowed',
+                    showConfirmButton: false,
+                    timer: 3000,
+
+                })
+                return false;
+            }
+        },
+
+        UploadFile: function (todoId) {
+            this.fileEntity.FileBase64 = this.file;
+            this.fileEntity.FileName = this.fileName;
+            this.fileEntity.TodoId = todoId;
+            this.$http.post('/api/FileApi/UploadFile', this.fileEntity).then(response => {
+                // response body
             }, response => {
                 // error callback
             });
         },
 
-        SelectUser: function (user) {
-            this.selectedUser = user;
-            this.newTodo.UserId = user.Id;
+        DownloadFile: function (fileId) {
+            this.$http.get('/api/FileApi/DownloadFile?fileId=' + fileId).then(response => {
+                console.log(response.body);
+                console.log(this.ConvertBase64ToFile(response.body))
+            }, response => {
+                // error callback
+            });
         },
+
+        ConvertBase64ToFile: function (image) {
+            const byteString = atob(image.split(',')[1]);
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i += 1) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            const newBlob = new Blob([ab], {
+                type: 'image/jpeg',
+            });
+            return newBlob;
+        },
+
     },
     created: function () {
-        this.GetTodos();
-        this.GetDoneTodos();
-        this.GetToBeDoneTodos();
+        this.GetMyTodos();
+        this.GetMyDoneTodos();
+        this.GetMyToBeDoneTodos();
         this.GetPrioritys();
-        this.GetUsers();
     }
 })
 

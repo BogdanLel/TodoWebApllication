@@ -32,5 +32,6 @@ namespace TodoWebApllication.Models
         public virtual DbSet<AspNetUser> AspNetUsers { get; set; }
         public virtual DbSet<Priority> Priorities { get; set; }
         public virtual DbSet<Todo> Todos { get; set; }
+        public virtual DbSet<FilesTable> FilesTables { get; set; }
     }
 }

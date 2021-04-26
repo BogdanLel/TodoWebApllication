@@ -4,6 +4,8 @@ using TodoWebAplication.BussinesLogic;
 using TodoWebAplication.Models;
 using TodoWebAplication.Models.ViewModels;
 using TodoWebApllication.Models;
+using Microsoft.AspNet.Identity;
+using System.Threading.Tasks;
 
 namespace TodoWebAplication.Controllers
 {
@@ -16,6 +18,27 @@ namespace TodoWebAplication.Controllers
         public TodoApiController()
         {
             _db = new Entities();
+        }
+
+        [Route("GetMyTodos")]
+        [HttpPost]
+        public IHttpActionResult GetMyTodos(Filter filter)
+        {
+            try
+            {
+                TodoLogic todoLogic = new TodoLogic(_db);
+                var currentUser = User.Identity.GetUserId();
+                var result = todoLogic.GetTodos(filter,currentUser);
+                if (result.Items.Count == 0)
+                {
+                    // exception
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Something went wrong!");
+            }
         }
 
         [Route("GetTodos")]
@@ -61,6 +84,22 @@ namespace TodoWebAplication.Controllers
             {
                 TodoLogic todoLogic = new TodoLogic(_db);
                 todoLogic.AddTodo(todo);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Todo cannot be added!");
+            }
+        }
+        [Route("AddMyTodo")]
+        [HttpPost]
+        public IHttpActionResult AddMyTodo(CreateTodoViewModel todo)
+        {
+            try
+            {
+                TodoLogic todoLogic = new TodoLogic(_db);
+                var currentUser = User.Identity.GetUserId();
+                todoLogic.AddTodo(todo, currentUser);
                 return Ok();
             }
             catch (Exception ex)
@@ -118,6 +157,24 @@ namespace TodoWebAplication.Controllers
             }
         }
 
+        [Route("GetMyDoneTodos")]
+        [HttpGet]
+        public IHttpActionResult GetMyDoneTodos(int CurrentPage, int PageSize)
+        {
+
+            try
+            {
+                TodoLogic todoLogic = new TodoLogic(_db);
+                var currentUser = User.Identity.GetUserId();
+                var result = todoLogic.GetDoneTodos(CurrentPage, PageSize, currentUser);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Update cannot be executed!");
+            }
+        }
+
         [Route("GetToBeDoneTodos")]
         [HttpGet]
         public IHttpActionResult GetToBeDoneTodos(int CurrentPage, int PageSize)
@@ -126,6 +183,23 @@ namespace TodoWebAplication.Controllers
             {
                 TodoLogic todoLogic = new TodoLogic(_db);
                 var result = todoLogic.GetToBeDoneTodos(CurrentPage, PageSize);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Update cannot be executed!");
+            }
+        }
+
+        [Route("GetMyToBeDoneTodos")]
+        [HttpGet]
+        public IHttpActionResult GetMyToBeDoneTodos(int CurrentPage, int PageSize)
+        {
+            try
+            {
+                TodoLogic todoLogic = new TodoLogic(_db);
+                var currentUser = User.Identity.GetUserId();
+                var result = todoLogic.GetToBeDoneTodos(CurrentPage, PageSize, currentUser);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -149,5 +223,6 @@ namespace TodoWebAplication.Controllers
                 return BadRequest("Something went wrong!");
             }
         }
+
     }
 }

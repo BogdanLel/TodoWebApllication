@@ -17,5 +17,12 @@ namespace TodoWebAplication.Models.ViewModels
         public string UserId { get; set; }
         public string UserName { get; set; }
         public string UserEmail { get; set; }
+        public List<FilesViewModel> Files { get; set; }
+    }
+
+    public class FilesViewModel
+    {
+        public int FileId { get; set; }
+        public string FileName { get; set; }
     }
 }

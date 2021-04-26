@@ -9,6 +9,7 @@ namespace TodoWebApllication.Controllers
     public class PriorityController : Controller
     {
         // GET: Priority
+        [Authorize(Roles = "Admin,User")]
         public ActionResult Index()
         {
             return View();
